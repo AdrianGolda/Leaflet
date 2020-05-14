@@ -25,3 +25,6 @@ export * from './map/index';
 
 import {freeze} from './core/Util';
 Object.freeze = freeze;
+
+export * from './script.js';
+

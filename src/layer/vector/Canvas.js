@@ -278,6 +278,7 @@ export var Canvas = Renderer.extend({
 		if (!len) { return; }
 
 		ctx.beginPath();
+		
 
 		for (i = 0; i < len; i++) {
 			for (j = 0, len2 = parts[i].length; j < len2; j++) {

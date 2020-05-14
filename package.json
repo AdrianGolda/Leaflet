@@ -52,7 +52,7 @@
     "integrity": "node ./build/integrity.js"
   },
   "eslintConfig": {
-    "root": true,
+    "root": false,
     "globals": {
       "L": true
     },
