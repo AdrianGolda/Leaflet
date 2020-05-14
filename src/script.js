@@ -1,10 +1,10 @@
 
 
 
-var canvas = document.getElementById("canvas");
-canvas.width = 1000
-canvas.height = 1000
-var ctx = canvas.getContext("2d");
+// var canvas = document.getElementById("canvas");
+// canvas.width = 1000
+// canvas.height = 1000
+// var ctx = canvas.getContext("2d");
 
 const prepareZigZag = (startX, startY, endX, endY) => {
     const c =10;
@@ -117,14 +117,29 @@ const drawLadderLine = (startX, startY, endX, endY, weight) => {
 }
 
 // prepareZigZag(0,0,100,100);
-drawNormalPath(800,200, 600, 400, 5)
-drawZigZagPath(0,0,150,150,5)
-drawArrowPath(500,100,400,200, 6)
-drawDashedPath(500,500,700,700, 3)
-drawLadderLine(300,300, 300, 500, 5)
+// drawNormalPath(800,200, 600, 400, 5)
+// drawZigZagPath(0,0,150,150,5)
+// drawArrowPath(500,100,400,200, 6)
+// drawDashedPath(500,500,700,700, 3)
+// drawLadderLine(300,300, 300, 500, 5)
 
-// let polyline = new SVGPolylineElement
+import * as L from './Leaflet';
+	var renderer = new L.Canvas;
+	var map = L.map('map', {
+		crs: L.CRS.Simple,
+        preferCanvas: true,
+        tap: false,
+        dragging: false,
+
+    });
+    var bounds = [[0,0], [1000,1000]];
+    map.fitBounds(bounds);
+	L.imageOverlay('https://image.shutterstock.com/image-photo/little-grey-kitten-walking-yard-260nw-288913778.jpg', bounds).addTo(map)
+
+    L.polyline([[300,300],[500,800]], {color: 'red', lineType: 'ladder' }).addTo(map);
+	    L.polyline([[300,300],[500,800]], {color: 'red', lineType: '' }).addTo(map);
 
 
 
 
+// var marker = L.marker([500, 500]).addTo(map);

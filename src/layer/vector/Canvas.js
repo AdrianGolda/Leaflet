@@ -267,6 +267,37 @@ export var Canvas = Renderer.extend({
 		this._ctx.restore();  // Restore state before clipping.
 	},
 
+
+
+	 _drawLadderLine: (startX, startY, endX, endY, weight, ctx) => {
+		const dx = endX - startX
+		const dy = endY - startY
+		const length = Math.sqrt((dx) ** 2 + (dy) ** 2)
+
+
+		let path = `m ${0} ${0} m 0 ${-weight/2} `
+		const oneLadder = ` v ${weight} h ${weight} v ${-weight} h ${-weight} m ${weight} 0 `
+		const howManyLadders = length/(weight)
+		for (let i=0 ;i<howManyLadders;i++) {
+			path+=oneLadder
+		}
+		const pathObject = new Path2D(path);
+		// console.log(pathObject)
+
+		let angle = 0
+		 angle = Math.atan2(Math.abs(dy),  Math.abs(dx))
+
+		 // ctx.save()
+		ctx.rotate(-angle)
+		 ctx.restore()
+		ctx.translate(startX, startY);
+		// ctx.restore()
+		//  ctx.rotate(10* Math.PI/180)
+
+		ctx.stroke(pathObject)
+		ctx.restore()
+		},
+
 	_updatePoly: function (layer, closed) {
 		if (!this._drawing) { return; }
 
@@ -275,22 +306,45 @@ export var Canvas = Renderer.extend({
 		    len = parts.length,
 		    ctx = this._ctx;
 
+
 		if (!len) { return; }
 
-		ctx.beginPath();
-		
+		if( layer.options.lineType === 'ladder') {
+			for (i = 0; i < len; i++) {
+				for (j = 0, len2 = parts[i].length; j+1 < len2; j++) {
+					const start = parts[i][j];
+					const end = parts[i][j+1];
+					console.log(start, end)
+					this._drawLadderLine(start.x, start.y, end.x, end.y,20,ctx)
 
-		for (i = 0; i < len; i++) {
-			for (j = 0, len2 = parts[i].length; j < len2; j++) {
-				p = parts[i][j];
-				ctx[j ? 'lineTo' : 'moveTo'](p.x, p.y);
-			}
-			if (closed) {
-				ctx.closePath();
+
+					// ctx[j ? 'lineTo' : 'moveTo'](p.x, p.y);
+				}
+				if (closed) {
+					ctx.closePath();
+				}
 			}
 		}
+		else {
 
-		this._fillStroke(ctx, layer);
+
+			ctx.beginPath();
+
+
+			for (i = 0; i < len; i++) {
+				for (j = 0, len2 = parts[i].length; j < len2; j++) {
+					p = parts[i][j];
+					ctx[j ? 'lineTo' : 'moveTo'](p.x, p.y);
+				}
+				if (closed) {
+					ctx.closePath();
+				}
+			}
+
+
+			this._fillStroke(ctx, layer);
+		}
+
 
 		// TODO optimization: 1 fill/stroke for all features with equal style instead of 1 for each feature
 	},

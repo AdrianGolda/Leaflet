@@ -57,7 +57,9 @@ export var Polyline = Path.extend({
 
 		// @option noClip: Boolean = false
 		// Disable polyline clipping.
-		noClip: false
+		noClip: false,
+
+		lineType: 'normal'
 	},
 
 	initialize: function (latlngs, options) {
