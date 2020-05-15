@@ -285,26 +285,29 @@ export var Canvas = Renderer.extend({
 	},
 
 
-
 	 _drawLadderLine: (startX, startY, endX, endY, weight, ctx) => {
 		const dx = endX - startX
 		const dy = endY - startY
+		 const slope = dy / dx;
 		const length = Math.sqrt((dx) ** 2 + (dy) ** 2)
 		const howManyLadders = length/(weight)
-		 // ctx.translate(startX , startY);
-		 ctx.moveTo(0+startX, weight+startY)
-		 for (let i=0; i<howManyLadders;i++) {
-		 	ctx.lineTo((i*weight+startX), 0+startY);
-		 	ctx.lineTo((i+1)*weight+startX, 0+startY);
-		 	ctx.lineTo((i+1)*weight+startX, weight+startY);
-			ctx.lineTo(i*weight+startX, weight+startY);
-			ctx.moveTo((i+1)*weight+startX, weight+startY);
-		 }
-		 // ctx.lineTo(endX, endY)
-		 // ctx.translate(startX , startY);
 
-		 // ctx.save()
-		 ctx.restore()
+		 ctx.moveTo(startX, startY)
+		 ctx.lineTo(endX, endY)
+		 ctx.lineTo(endX-weight, endY-weight)
+		 ctx.lineTo(startX-weight, startY-weight)
+		 ctx.lineTo(startX, startY)
+		 let i = 0
+		 let currentCoords = [startX, startY]
+		 while (currentCoords[0] < endX && currentCoords[1] > endY) {
+			let curX = (Math.abs(dx) / weight) * i + startX
+		  let curY = (Math.abs(dy) / weight) * -i + startY
+		 	ctx.moveTo(curX, curY)
+		 	// ctx.lineTo(startX+i*weight, startY-i*weight);
+		 	ctx.lineTo(curX-weight, curY-weight);
+		 	currentCoords = [curX, curY]
+		 	i++
+		 }
 
 		},
 
@@ -341,18 +344,15 @@ export var Canvas = Renderer.extend({
 			}
 				break;
 			case 'arrow' : {
+				ctx.beginPath();
 				for (i = 0; i < len; i++) {
 					for (j = 0, len2 = parts[i].length; j + 1 < len2; j++) {
 						const start = parts[i][j];
 						const end = parts[i][j + 1];
-						console.log(start, end)
 						this._drawArrowLine(start.x, start.y, end.x, end.y, 20, ctx)
-
-
-						// ctx[j ? 'lineTo' : 'moveTo'](p.x, p.y);
 					}
 				}
-
+			this._fillStroke(ctx, layer);
 
 			}
 			break;
