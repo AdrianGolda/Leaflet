@@ -134,10 +134,10 @@ import * as L from './Leaflet';
     });
     var bounds = [[0,0], [1000,1000]];
     map.fitBounds(bounds);
-	L.imageOverlay('https://image.shutterstock.com/image-photo/little-grey-kitten-walking-yard-260nw-288913778.jpg', bounds).addTo(map)
+	// L.imageOverlay('https://image.shutterstock.com/image-photo/little-grey-kitten-walking-yard-260nw-288913778.jpg', bounds).addTo(map)
 
-    L.polyline([[300,300],[500,800]], {color: 'red', lineType: 'ladder' }).addTo(map);
-	    L.polyline([[300,300],[500,800]], {color: 'red', lineType: '' }).addTo(map);
+    L.polyline([[100,100],[400,600]], {color: 'red', lineType: 'ladder' }).addTo(map);
+    L.polyline([[500,500],[800,800]], {color: 'red', lineType: '', weight: 4}).addTo(map);
 
 
 

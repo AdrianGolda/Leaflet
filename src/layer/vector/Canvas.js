@@ -267,86 +267,128 @@ export var Canvas = Renderer.extend({
 		this._ctx.restore();  // Restore state before clipping.
 	},
 
+	_drawArrowLine: (startX, startY, endX, endY, weight, ctx) => {
+		 const dx = endX-startX
+		const dy = endY-startY
+		const length = Math.sqrt((dx)**2+(dy)**2)
+		let path = `m ${0} ${0} l ${length} 0`
+		const arrow =  ` l 0 ${weight} ${weight} ${-weight} ${-weight} ${-weight} 0 ${weight}`
+		path += arrow
+		const pathObject = new Path2D(path);
+		ctx.fill(pathObject)
+		 let angle = 0
+		 angle = Math.atan2(Math.abs(dy),  Math.abs(dx))
+		ctx.rotate(-angle)
+		ctx.stroke(pathObject)
+
+		ctx.translate(startX , startY);
+	},
+
 
 
 	 _drawLadderLine: (startX, startY, endX, endY, weight, ctx) => {
 		const dx = endX - startX
 		const dy = endY - startY
 		const length = Math.sqrt((dx) ** 2 + (dy) ** 2)
-
-
-		let path = `m ${0} ${0} m 0 ${-weight/2} `
-		const oneLadder = ` v ${weight} h ${weight} v ${-weight} h ${-weight} m ${weight} 0 `
 		const howManyLadders = length/(weight)
-		for (let i=0 ;i<howManyLadders;i++) {
-			path+=oneLadder
-		}
-		const pathObject = new Path2D(path);
-		// console.log(pathObject)
-
-		let angle = 0
-		 angle = Math.atan2(Math.abs(dy),  Math.abs(dx))
+		 // ctx.translate(startX , startY);
+		 ctx.moveTo(0+startX, weight+startY)
+		 for (let i=0; i<howManyLadders;i++) {
+		 	ctx.lineTo((i*weight+startX), 0+startY);
+		 	ctx.lineTo((i+1)*weight+startX, 0+startY);
+		 	ctx.lineTo((i+1)*weight+startX, weight+startY);
+			ctx.lineTo(i*weight+startX, weight+startY);
+			ctx.moveTo((i+1)*weight+startX, weight+startY);
+		 }
+		 // ctx.lineTo(endX, endY)
+		 // ctx.translate(startX , startY);
 
 		 // ctx.save()
-		ctx.rotate(-angle)
 		 ctx.restore()
-		ctx.translate(startX, startY);
-		// ctx.restore()
-		//  ctx.rotate(10* Math.PI/180)
 
-		ctx.stroke(pathObject)
-		ctx.restore()
 		},
 
 	_updatePoly: function (layer, closed) {
-		if (!this._drawing) { return; }
+		if (!this._drawing) {
+			return;
+		}
 
 		var i, j, len2, p,
-		    parts = layer._parts,
-		    len = parts.length,
-		    ctx = this._ctx;
+			parts = layer._parts,
+			len = parts.length,
+			ctx = this._ctx;
 
 
-		if (!len) { return; }
-
-		if( layer.options.lineType === 'ladder') {
-			for (i = 0; i < len; i++) {
-				for (j = 0, len2 = parts[i].length; j+1 < len2; j++) {
-					const start = parts[i][j];
-					const end = parts[i][j+1];
-					console.log(start, end)
-					this._drawLadderLine(start.x, start.y, end.x, end.y,20,ctx)
-
-
-					// ctx[j ? 'lineTo' : 'moveTo'](p.x, p.y);
-				}
-				if (closed) {
-					ctx.closePath();
-				}
-			}
+		if (!len) {
+			return;
 		}
-		else {
+
+		switch (layer.options.lineType) {
+			case 'ladder': {
+				for (i = 0; i < len; i++) {
+					for (j = 0, len2 = parts[i].length; j + 1 < len2; j++) {
+						const start = parts[i][j];
+						const end = parts[i][j + 1];
+						this._drawLadderLine(start.x, start.y, end.x, end.y, 5, ctx)
 
 
-			ctx.beginPath();
+						// ctx[j ? 'lineTo' : 'moveTo'](p.x, p.y);
+					}
 
-
-			for (i = 0; i < len; i++) {
-				for (j = 0, len2 = parts[i].length; j < len2; j++) {
-					p = parts[i][j];
-					ctx[j ? 'lineTo' : 'moveTo'](p.x, p.y);
 				}
-				if (closed) {
-					ctx.closePath();
-				}
-			}
-
-
 			this._fillStroke(ctx, layer);
+				break;
+			}
+				break;
+			case 'arrow' : {
+				for (i = 0; i < len; i++) {
+					for (j = 0, len2 = parts[i].length; j + 1 < len2; j++) {
+						const start = parts[i][j];
+						const end = parts[i][j + 1];
+						console.log(start, end)
+						this._drawArrowLine(start.x, start.y, end.x, end.y, 20, ctx)
+
+
+						// ctx[j ? 'lineTo' : 'moveTo'](p.x, p.y);
+					}
+				}
+
+
+			}
+			break;
+			default: {
+
+
+				ctx.beginPath();
+
+				// let path= ` moveTo ${parts[0][0].x} ${parts[0][0].y} `
+				ctx.moveTo(parts[0][0].x, parts[0][0].y)
+				for (i = 0; i < len; i++) {
+					for (j = 1, len2 = parts[i].length; j < len2; j++) {
+						p = parts[i][j];
+						// path+=` lineto ${p.x} ${p.y} `
+						ctx.lineTo(p.x, p.y)
+						// ctx[j ? 'lineTo' : 'moveTo'](p.x, p.y);
+
+					}
+
+					if (closed) {
+						ctx.closePath();
+					}
+				}
+				// console.log(path)
+				// const pathObj = new Path2D(path)
+				// ctx.stroke(pathObj)
+
+				this._fillStroke(ctx, layer);
+			}
+
+
+			// TODO optimization: 1 fill/stroke for all features with equal style instead of 1 for each feature
 		}
-
-
-		// TODO optimization: 1 fill/stroke for all features with equal style instead of 1 for each feature
+		if (closed) {
+						ctx.closePath();
+					}
 	},
 
 	_updateCircle: function (layer) {
