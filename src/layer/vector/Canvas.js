@@ -268,21 +268,24 @@ export var Canvas = Renderer.extend({
 		this._ctx.restore();  // Restore state before clipping.
 	},
 
-	_drawArrowLine: (startX, startY, endX, endY, weight, ctx) => {
-		 const dx = endX-startX
-		const dy = endY-startY
-		const length = Math.sqrt((dx)**2+(dy)**2)
-		let path = `m ${0} ${0} l ${length} 0`
-		const arrow =  ` l 0 ${weight} ${weight} ${-weight} ${-weight} ${-weight} 0 ${weight}`
-		path += arrow
-		const pathObject = new Path2D(path);
-		ctx.fill(pathObject)
-		 let angle = 0
-		 angle = Math.atan2(Math.abs(dy),  Math.abs(dx))
-		ctx.rotate(-angle)
+	_drawArrowLine: function(startX, startY, endX, endY, weight, ctx)  {
+		ctx.moveTo(startX, startY)
+		ctx.lineTo(endX, endY)
+		const zoom = 2**this._map.getZoom();
+		const dy = endY-startY;
+		const dx = endX-startX;
+		const PI = Math.PI;
+		const alfa = Math.atan2(dy,dx)
+		const cos = Math.cos;
+		const sin = Math.sin;
+		const beta =  - alfa + 0.5*PI;
+		const canvasWeight = weight * zoom
+		const x = canvasWeight;
+		// const arrow =  `m ${endX} ${endY} l  ${-2*x*sin(beta)} ${x*cos(beta)} l ${2*x*sin(alfa)} ${-x*sin(alfa)}  `
+		// path += arrow
+		const pathObject = new Path2D(arrow);
+		// ctx.fill(pathObject)
 		ctx.stroke(pathObject)
-
-		ctx.translate(startX , startY);
 	},
 
 
@@ -322,10 +325,6 @@ export var Canvas = Renderer.extend({
 
 
 	_drawZigZagLine: function(startX,startY,endX,endY, weight,ctx) {
-		function ctg(x) { return 1 / Math.tan(x); }
-		// const realStart = this._map.layerPointToContainerPoint([startX, startY])
-		// const realEnd = this._map.layerPointToContainerPoint([endX, endY])
-
 		const realStart = this._map.layerPointToLatLng([startX, startY]);
 		const realEnd = this._map.layerPointToLatLng([endX, endY]);
 		const zoom = 2**this._map.getZoom();
@@ -335,50 +334,26 @@ export var Canvas = Renderer.extend({
 		const canvasLength = Math.sqrt((canvasDx)**2+(canvasDy)**2)
 		const realDx = realEnd.lng-realStart.lng;
 		const realDy = realEnd.lat-realStart.lat;
-		const realLength = Math.sqrt((realDx)**2+(realDy)**2)
-		// console.log('startY', startY, 'endX', endX, realStart.lng, realEnd.lng)
-		// console.log((startX-endX)/(realStart.lng-realEnd.lng));
-		// console.log('zoom', 2**this._map.getZoom())
-		console.log('d', realDy, realDx)
 		const alpha = Math.atan2(realDy, realDx)
 		const x = canvasWeight;
 		const L = canvasLength;
 		const PI = Math.PI
-		console.log(alpha)
 		const beta = (alpha - 0.25*PI);
 		const sin = Math.sin;
 		const cos = Math.cos;
-		// console.log('ctg', ctg(beta))
-		// console.log('beta', beta*180/PI)
 
-	    const howManyZigZags = L/(x*Math.sqrt(2))
+	    const howManyZigZags = L/(2*x*Math.sqrt(2))
 		const oneZigZag = `
 		l ${x*cos(beta)} ${-x*sin(beta)} 
 		l ${-2*x*sin(beta)} ${-2*x*cos(beta)} 
 		 l ${x*cos(beta)} ${-x*sin(beta)} 
 		`;
-		// let path = ' m 0 0 '
-		// console.log(startX, startY)
 		let path = `m ${startX} ${startY}`
-		// path+= ` l ${canvasWeight*Math.cos(-angle+Math.PI*0.25)} ${canvasWeight*Math.sin(-angle+0.25*Math.PI)} `
 		for (let i=0; i < howManyZigZags;i++) {
 			path += oneZigZag
 		}
-		console.log(path)
 		const pathObject = new Path2D(path);
-		// const translateY = -1000 * zoom
-		// ctx.translate(0, translateY)
-		// ctx.translate(ctx.height, 0);
-		// ctx.rotate(-angle)
-		// ctx.translate(0, 0)
-
-
-		// console.log(startX, startY)
 		ctx.stroke(pathObject)
-		ctx.moveTo(startX, startY)
-		ctx.lineTo(endX, endY)
-
-
 	},
 
 	_updatePoly: function (layer, closed) {
@@ -395,6 +370,7 @@ export var Canvas = Renderer.extend({
 		if (!len) {
 			return;
 		}
+		console.log(layer.options.lineType)
 
 		switch (layer.options.lineType) {
 			case 'ladder': {
@@ -412,27 +388,28 @@ export var Canvas = Renderer.extend({
 			this._fillStroke(ctx, layer);
 				break;
 			}
-				break;
 			case 'arrow' : {
+				console.log('arrow')
 				ctx.beginPath();
+				ctx.moveTo(parts[0][0].x, parts[0][0].y)
 				for (i = 0; i < len; i++) {
 					for (j = 0, len2 = parts[i].length; j + 1 < len2; j++) {
 						const start = parts[i][j];
 						const end = parts[i][j + 1];
-						this._drawArrowLine(start.x, start.y, end.x, end.y, 100, ctx)
+						// ctx.lineTo(end.x, end.y)
+						this._drawArrowLine(start.x, start.y, end.x, end.y, 15, ctx)
 					}
 				}
 			this._fillStroke(ctx, layer);
-
+				break;
 			}
-			break;
 				case 'zigzag' : {
 				ctx.beginPath();
 				for (i = 0; i < len; i++) {
 					for (j = 0, len2 = parts[i].length; j + 1 < len2; j++) {
 						const start = parts[i][j];
 						const end = parts[i][j + 1];
-						this._drawZigZagLine(start.x, start.y, end.x, end.y, 10, ctx)
+						this._drawZigZagLine(start.x, start.y, end.x, end.y, 4, ctx)
 					}
 				}
 			this._fillStroke(ctx, layer);

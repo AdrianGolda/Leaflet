@@ -1,11 +1,3 @@
-
-
-
-// var canvas = document.getElementById("canvas");
-// canvas.width = 1000
-// canvas.height = 1000
-// var ctx = canvas.getContext("2d");
-
 const prepareZigZag = (startX, startY, endX, endY) => {
     const c =10;
     const d = 10;
@@ -123,6 +115,19 @@ const drawLadderLine = (startX, startY, endX, endY, weight) => {
 // drawDashedPath(500,500,700,700, 3)
 // drawLadderLine(300,300, 300, 500, 5)
 
+const types = ['normal', 'dashed', 'zigzag', 'arrow', 'ladder']
+
+let lineType = 'normal'
+document.addEventListener('DOMContentLoaded', () => {
+        for (let type of types) {
+            console.log(type);
+            document.getElementById(type).addEventListener('click', () => {
+                lineType = type;
+                console.log('line', lineType)
+            })
+        }
+    })
+
 import * as L from './Leaflet';
 	var renderer = new L.Canvas;
 	var map = L.map('map', {
@@ -130,19 +135,42 @@ import * as L from './Leaflet';
         preferCanvas: true,
         tap: false,
         dragging: true,
-        center: [200,200],
+        center: [500,500],
         zoom: 1
     });
+	let coords = []
     var bounds = [[0,0], [1000,1000]];
     map.on('click', (e) => {
-        console.log('latlng', e.latlng,)
+        if (coords.length ===  0) {
+            coords.push(e.latlng)
+        }
+        else if (coords.length === 1) {
+            if (lineType !== 'dashed')
+             L.polyline([[coords[0].lat, coords[0].lng],[e.latlng.lat,e.latlng.lng]], {color: 'red', lineType: lineType , noClip: true}).addTo(map);
+            else
+             L.polyline([[coords[0].lat, coords[0].lng],[e.latlng.lat,e.latlng.lng]], {color: 'red', dashArray: [5,5] , noClip: true}).addTo(map);
+             coords = []
+             // coords.push(e.latlng)
+            // console.log(coords)
+        }
+        // else if (coords.length === 2) {
+        //      L.polyline([[coords[0].lat, coords[0].lng],[coords[1].lat, coords[1].lng],[e.latlng.lat,e.latlng.lng]], {color: 'red', lineType: 'zigzag' , noClip: true}).addTo(map);
+        //      coords = []
+        // }
     })
+    map.on('mousemove', (e) => {
+        if (coords.length === 1) {
+
+        }
+    })
+
+
 	L.imageOverlay('https://image.shutterstock.com/image-photo/little-grey-kitten-walking-yard-260nw-288913778.jpg', bounds).addTo(map)
 
     // L.polyline([[100,100],[400,600]], {color: 'red', lineType: 'ladder' , noClip: true}).addTo(map);
-    L.polyline([[500,300],[400,200]], {color: 'red', lineType: 'zigzag' , noClip: true}).addTo(map);
 
-    // L.polyline([[500,500],[800,800]], {color: 'red', lineType: '', weight: 4}).addTo(map);
+
+    L.polyline([[500,500],[588,580]], {color: 'red', lineType: '', weight: 4, dashArray: [5,5]}).addTo(map);
 
 
 
