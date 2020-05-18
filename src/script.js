@@ -140,7 +140,7 @@ import * as L from './Leaflet';
 	L.imageOverlay('https://image.shutterstock.com/image-photo/little-grey-kitten-walking-yard-260nw-288913778.jpg', bounds).addTo(map)
 
     // L.polyline([[100,100],[400,600]], {color: 'red', lineType: 'ladder' , noClip: true}).addTo(map);
-    L.polyline([[0,0],[100,100]], {color: 'red', lineType: 'zigzag' , noClip: true}).addTo(map);
+    L.polyline([[500,300],[400,200]], {color: 'red', lineType: 'zigzag' , noClip: true}).addTo(map);
 
     // L.polyline([[500,500],[800,800]], {color: 'red', lineType: '', weight: 4}).addTo(map);
 

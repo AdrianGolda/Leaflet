@@ -320,7 +320,9 @@ export var Canvas = Renderer.extend({
 			}
 		},
 
+
 	_drawZigZagLine: function(startX,startY,endX,endY, weight,ctx) {
+		function ctg(x) { return 1 / Math.tan(x); }
 		// const realStart = this._map.layerPointToContainerPoint([startX, startY])
 		// const realEnd = this._map.layerPointToContainerPoint([endX, endY])
 
@@ -338,28 +340,31 @@ export var Canvas = Renderer.extend({
 		// console.log((startX-endX)/(realStart.lng-realEnd.lng));
 		// console.log('zoom', 2**this._map.getZoom())
 		console.log('d', realDy, realDx)
-		const angle = Math.atan2(realDy, realDx)
-		// console.log('angle', angle*180/Math.PI)
-		const cos = Math.cos(angle+0.25);
-		const sin = Math.sin(angle+0.5);
-		console.log('angle', angle*180/Math.PI)
-		console.log('rot', (angle-0.5*Math.PI)*180/Math.PI)
+		const alpha = Math.atan2(realDy, realDx)
+		const x = canvasWeight;
+		const L = canvasLength;
+		const PI = Math.PI
+		console.log(alpha)
+		const beta = (alpha - 0.25*PI);
+		const sin = Math.sin;
+		const cos = Math.cos;
+		// console.log('ctg', ctg(beta))
+		// console.log('beta', beta*180/PI)
 
-	    const howManyZigZags = canvasLength/(canvasWeight)
-		// console.log(howManyZigZags);
-		const test = Math.sin(0.5 * Math.PI)
-		// console.log(asin(test))
+	    const howManyZigZags = L/(x*Math.sqrt(2))
 		const oneZigZag = `
-		l ${canvasWeight*Math.cos(-angle-(0.25*Math.PI))} ${3*canvasWeight*Math.sin(angle-0.5*Math.PI)} 
-		l ${3*canvasWeight*Math.cos(-angle+Math.PI*0.25)} ${2*canvasWeight*Math.sin(-angle+Math.PI*0.25)} 
+		l ${x*cos(beta)} ${-x*sin(beta)} 
+		l ${-2*x*sin(beta)} ${-2*x*cos(beta)} 
+		 l ${x*cos(beta)} ${-x*sin(beta)} 
 		`;
 		// let path = ' m 0 0 '
 		// console.log(startX, startY)
 		let path = `m ${startX} ${startY}`
-		path+= ` l ${canvasWeight*Math.cos(-angle+Math.PI*0.25)} ${canvasWeight*Math.sin(-angle+0.25*Math.PI)} `
+		// path+= ` l ${canvasWeight*Math.cos(-angle+Math.PI*0.25)} ${canvasWeight*Math.sin(-angle+0.25*Math.PI)} `
 		for (let i=0; i < howManyZigZags;i++) {
 			path += oneZigZag
 		}
+		console.log(path)
 		const pathObject = new Path2D(path);
 		// const translateY = -1000 * zoom
 		// ctx.translate(0, translateY)
