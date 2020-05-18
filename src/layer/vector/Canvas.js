@@ -334,21 +334,29 @@ export var Canvas = Renderer.extend({
 		const realDx = realEnd.lng-realStart.lng;
 		const realDy = realEnd.lat-realStart.lat;
 		const realLength = Math.sqrt((realDx)**2+(realDy)**2)
-		console.log('startY', startY, 'endX', endX, realStart.lng, realEnd.lng)
-		console.log((startX-endX)/(realStart.lng-realEnd.lng));
-		console.log('zoom', 2**this._map.getZoom())
-		const angle = -Math.atan2(realDy, realDx)
+		// console.log('startY', startY, 'endX', endX, realStart.lng, realEnd.lng)
+		// console.log((startX-endX)/(realStart.lng-realEnd.lng));
+		// console.log('zoom', 2**this._map.getZoom())
+		console.log('d', realDy, realDx)
+		const angle = Math.atan2(realDy, realDx)
+		// console.log('angle', angle*180/Math.PI)
+		const cos = Math.cos(angle+0.25);
+		const sin = Math.sin(angle+0.5);
 		console.log('angle', angle*180/Math.PI)
-		const cos = Math.cos(angle);
-		const sin = Math.sin(angle);
-		// console.log('rot', rot)
+		console.log('rot', (angle-0.5*Math.PI)*180/Math.PI)
 
-	    const howManyZigZags = canvasLength/(canvasWeight)*cos
+	    const howManyZigZags = canvasLength/(canvasWeight)
 		// console.log(howManyZigZags);
-		const oneZigZag = ` l ${canvasWeight*1/16*cos} ${canvasWeight} l ${canvasWeight} ${canvasWeight*1/16*sin} `;
+		const test = Math.sin(0.5 * Math.PI)
+		// console.log(asin(test))
+		const oneZigZag = `
+		l ${canvasWeight*Math.cos(-angle-(0.25*Math.PI))} ${3*canvasWeight*Math.sin(angle-0.5*Math.PI)} 
+		l ${3*canvasWeight*Math.cos(-angle+Math.PI*0.25)} ${2*canvasWeight*Math.sin(-angle+Math.PI*0.25)} 
+		`;
 		// let path = ' m 0 0 '
 		// console.log(startX, startY)
 		let path = `m ${startX} ${startY}`
+		path+= ` l ${canvasWeight*Math.cos(-angle+Math.PI*0.25)} ${canvasWeight*Math.sin(-angle+0.25*Math.PI)} `
 		for (let i=0; i < howManyZigZags;i++) {
 			path += oneZigZag
 		}
@@ -362,6 +370,8 @@ export var Canvas = Renderer.extend({
 
 		// console.log(startX, startY)
 		ctx.stroke(pathObject)
+		ctx.moveTo(startX, startY)
+		ctx.lineTo(endX, endY)
 
 
 	},
@@ -417,7 +427,7 @@ export var Canvas = Renderer.extend({
 					for (j = 0, len2 = parts[i].length; j + 1 < len2; j++) {
 						const start = parts[i][j];
 						const end = parts[i][j + 1];
-						this._drawZigZagLine(start.x, start.y, end.x, end.y, 5, ctx)
+						this._drawZigZagLine(start.x, start.y, end.x, end.y, 10, ctx)
 					}
 				}
 			this._fillStroke(ctx, layer);
