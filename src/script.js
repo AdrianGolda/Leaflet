@@ -129,15 +129,20 @@ import * as L from './Leaflet';
 		crs: L.CRS.Simple,
         preferCanvas: true,
         tap: false,
-        dragging: false,
-
+        dragging: true,
+        center: [200,200],
+        zoom: 1
     });
     var bounds = [[0,0], [1000,1000]];
-    map.fitBounds(bounds);
-	// L.imageOverlay('https://image.shutterstock.com/image-photo/little-grey-kitten-walking-yard-260nw-288913778.jpg', bounds).addTo(map)
+    map.on('mousemove', (e) => {
+        console.log('latlng', e.latlng)
+    })
+	L.imageOverlay('https://image.shutterstock.com/image-photo/little-grey-kitten-walking-yard-260nw-288913778.jpg', bounds).addTo(map)
 
-    L.polyline([[100,100],[400,600]], {color: 'red', lineType: 'ladder' }).addTo(map);
-    L.polyline([[500,500],[800,800]], {color: 'red', lineType: '', weight: 4}).addTo(map);
+    // L.polyline([[100,100],[400,600]], {color: 'red', lineType: 'ladder' , noClip: true}).addTo(map);
+    L.polyline([[0,0],[50,50]], {color: 'red', lineType: 'zigzag' , noClip: true}).addTo(map);
+
+    // L.polyline([[500,500],[800,800]], {color: 'red', lineType: '', weight: 4}).addTo(map);
 
 
 

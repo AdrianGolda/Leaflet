@@ -170,6 +170,7 @@ export var Canvas = Renderer.extend({
 		// Redraw the union of the layer's old pixel
 		// bounds and the new pixel bounds.
 		this._extendRedrawBounds(layer);
+		console.log('update')
 		layer._project();
 		layer._update();
 		// The redraw will extend the redraw bounds
@@ -285,13 +286,22 @@ export var Canvas = Renderer.extend({
 	},
 
 
-	 _drawLadderLine: (startX, startY, endX, endY, weight, ctx) => {
-		const dx = endX - startX
-		const dy = endY - startY
-		 const slope = dy / dx;
-		const length = Math.sqrt((dx) ** 2 + (dy) ** 2)
-		const howManyLadders = length/(weight)
+	 _drawLadderLine: function(startX, startY, endX, endY, weight, ctx)  {
 
+
+		 const realStart = this._map.layerPointToLatLng([startX, startY])
+		 const realEnd = this._map.layerPointToLatLng([endX, endY]);
+
+
+		 //
+		 // // const realStart = this._map.containerPointToLatLng([startX, startY]);
+		 // // const realEnd = this._map.containerPointToLatLng([endX, endY]);
+		 //
+		 // console.log('real', realStart, realEnd)
+		 // const realLength = Math.sqrt((realEnd.lng-realStart.lng)**2+(realEnd.lat-realStart.lat)**2)
+		 // console.log('real Length', realLength)
+		 const dx = endX - startX
+		 const dy = endY - startY
 		 ctx.moveTo(startX, startY)
 		 ctx.lineTo(endX, endY)
 		 ctx.lineTo(endX-weight, endY-weight)
@@ -300,16 +310,61 @@ export var Canvas = Renderer.extend({
 		 let i = 0
 		 let currentCoords = [startX, startY]
 		 while (currentCoords[0] < endX && currentCoords[1] > endY) {
-			let curX = (Math.abs(dx) / weight) * i + startX
-		  let curY = (Math.abs(dy) / weight) * -i + startY
-		 	ctx.moveTo(curX, curY)
-		 	// ctx.lineTo(startX+i*weight, startY-i*weight);
-		 	ctx.lineTo(curX-weight, curY-weight);
-		 	currentCoords = [curX, curY]
-		 	i++
-		 }
-
+		 	let curX = (Math.abs(dx) / weight) * i + startX
+			let curY = (Math.abs(dy) / weight) * -i + startY
+			ctx.moveTo(curX, curY)
+			// ctx.lineTo(startX+i*weight, startY-i*weight);
+			ctx.lineTo(curX-weight, curY-weight);
+			currentCoords = [curX, curY]
+			i++
+			}
 		},
+
+	_drawZigZagLine: function(startX,startY,endX,endY, weight,ctx) {
+		// const realStart = this._map.layerPointToContainerPoint([startX, startY])
+		// const realEnd = this._map.layerPointToContainerPoint([endX, endY])
+
+		const realStart = this._map.layerPointToLatLng([startX, startY]);
+		const realEnd = this._map.layerPointToLatLng([endX, endY]);
+		const zoom = 2**this._map.getZoom();
+		const canvasWeight = weight * zoom
+		const canvasDx = endX-startX;
+		const canvasDy = endY - startY;
+		const canvasLength = Math.sqrt((canvasDx)**2+(canvasDy)**2)
+		const realDx = realEnd.lng-realStart.lng;
+		const realDy = realEnd.lat-realStart.lat;
+		const realLength = Math.sqrt((realDx)**2+(realDy)**2)
+		console.log('startY', startY, 'endX', endX, realStart.lng, realEnd.lng)
+		console.log((startX-endX)/(realStart.lng-realEnd.lng));
+		console.log('zoom', 2**this._map.getZoom())
+		const angle = -Math.atan2(realDy, realDx)
+		console.log('angle', angle*180/Math.PI)
+		const cos = Math.cos(angle);
+		const sin = Math.sin(angle);
+		// console.log('rot', rot)
+
+	    const howManyZigZags = canvasLength/(canvasWeight)*cos
+		// console.log(howManyZigZags);
+		const oneZigZag = ` l ${canvasWeight*1/16*cos} ${canvasWeight} l ${canvasWeight} ${canvasWeight*1/16*sin} `;
+		// let path = ' m 0 0 '
+		// console.log(startX, startY)
+		let path = `m ${startX} ${startY}`
+		for (let i=0; i < howManyZigZags;i++) {
+			path += oneZigZag
+		}
+		const pathObject = new Path2D(path);
+		// const translateY = -1000 * zoom
+		// ctx.translate(0, translateY)
+		// ctx.translate(ctx.height, 0);
+		// ctx.rotate(-angle)
+		// ctx.translate(0, 0)
+
+
+		// console.log(startX, startY)
+		ctx.stroke(pathObject)
+
+
+	},
 
 	_updatePoly: function (layer, closed) {
 		if (!this._drawing) {
@@ -349,7 +404,20 @@ export var Canvas = Renderer.extend({
 					for (j = 0, len2 = parts[i].length; j + 1 < len2; j++) {
 						const start = parts[i][j];
 						const end = parts[i][j + 1];
-						this._drawArrowLine(start.x, start.y, end.x, end.y, 20, ctx)
+						this._drawArrowLine(start.x, start.y, end.x, end.y, 100, ctx)
+					}
+				}
+			this._fillStroke(ctx, layer);
+
+			}
+			break;
+				case 'zigzag' : {
+				ctx.beginPath();
+				for (i = 0; i < len; i++) {
+					for (j = 0, len2 = parts[i].length; j + 1 < len2; j++) {
+						const start = parts[i][j];
+						const end = parts[i][j + 1];
+						this._drawZigZagLine(start.x, start.y, end.x, end.y, 5, ctx)
 					}
 				}
 			this._fillStroke(ctx, layer);

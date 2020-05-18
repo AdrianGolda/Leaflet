@@ -996,7 +996,9 @@ export var Map = Evented.extend({
 	// @method unproject(point: Point, zoom: Number): LatLng
 	// Inverse of [`project`](#map-project).
 	unproject: function (point, zoom) {
+		// console.log('unproject')
 		zoom = zoom === undefined ? this._zoom : zoom;
+		// console.log(zoom)
 		return this.options.crs.pointToLatLng(toPoint(point), zoom);
 	},
 
