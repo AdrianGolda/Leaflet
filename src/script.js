@@ -107,26 +107,19 @@ const drawLadderLine = (startX, startY, endX, endY, weight) => {
     // ctx.rotate()
     ctx.stroke(pathObject)
 }
-
-// prepareZigZag(0,0,100,100);
-// drawNormalPath(800,200, 600, 400, 5)
-// drawZigZagPath(0,0,150,150,5)
-// drawArrowPath(500,100,400,200, 6)
-// drawDashedPath(500,500,700,700, 3)
-// drawLadderLine(300,300, 300, 500, 5)
-
+let coords = []
+//
+// import * as iconsvg1 from '../img/icon1.svg'
+// import * as iconsvg2 from '../img/icon2.svg'
+// import * as iconsvg3 from '../img/icon3.svg'
 const types = ['normal', 'dashed', 'zigzag', 'arrow', 'ladder']
 
+// const icons = [iconsvg1, iconsvg2, iconsvg3]
+const icons = ['icon1', 'icon2', 'icon3']
+
 let lineType = 'normal'
-document.addEventListener('DOMContentLoaded', () => {
-        for (let type of types) {
-            console.log(type);
-            document.getElementById(type).addEventListener('click', () => {
-                lineType = type;
-                console.log('line', lineType)
-            })
-        }
-    })
+let iconType = 'icon1'
+
 
 import * as L from './Leaflet';
 	var renderer = new L.Canvas;
@@ -138,32 +131,53 @@ import * as L from './Leaflet';
         center: [500,500],
         zoom: 1
     });
-	let coords = []
+
+document.addEventListener('DOMContentLoaded', () => {
+        for (let type of types) {
+            document.getElementById(type).addEventListener('click', () => {
+                lineType = type;
+                map.off('click');
+                map.on('click', (e) => {
+                    if (coords.length === 0) {
+                        coords.push(e.latlng)
+                    } else if (coords.length === 1) {
+                        if (lineType !== 'dashed')
+                            L.polyline([[coords[0].lat, coords[0].lng], [e.latlng.lat, e.latlng.lng]], {
+                                color: 'black',
+                                lineType: lineType,
+                                noClip: true
+                            }).addTo(map);
+                        else {
+                            L.polyline([[coords[0].lat, coords[0].lng], [e.latlng.lat, e.latlng.lng]], {
+                                color: 'black',
+                                dashArray: [5, 5],
+                                noClip: true
+                            }).addTo(map);
+
+                        }
+                          coords = []
+                    }
+                })
+            })
+        }
+        for (let icon of icons) {
+
+            document.getElementById(icon).addEventListener('click', (e) => {
+                   var iconUrl = `../${icon}.svg`
+                // iconType = icon;
+                // console.log('icon' ,icon)
+                map.off('click')
+                map.on('click', (e) => {
+                    const iconL = L.Icon.extend({options: {iconUrl: iconUrl, iconRetinaUrl: iconUrl, iconSize: [30,30]}});
+                    L.marker([e.latlng.lat, e.latlng.lng], {icon: new iconL}).addTo(map);
+                })
+            })
+        }
+    })
+
+
+
     var bounds = [[0,0], [1000,1000]];
-    map.on('click', (e) => {
-        if (coords.length ===  0) {
-            coords.push(e.latlng)
-        }
-        else if (coords.length === 1) {
-            if (lineType !== 'dashed')
-             L.polyline([[coords[0].lat, coords[0].lng],[e.latlng.lat,e.latlng.lng]], {color: 'black', lineType: lineType , noClip: true}).addTo(map);
-            else
-             L.polyline([[coords[0].lat, coords[0].lng],[e.latlng.lat,e.latlng.lng]], {color: 'black', dashArray: [5,5] , noClip: true}).addTo(map);
-             coords = []
-             // coords.push(e.latlng)
-            // console.log(coords)
-        }
-        // else if (coords.length === 2) {
-        //      L.polyline([[coords[0].lat, coords[0].lng],[coords[1].lat, coords[1].lng],[e.latlng.lat,e.latlng.lng]], {color: 'red', lineType: 'zigzag' , noClip: true}).addTo(map);
-        //      coords = []
-        // }
-    })
-    map.on('mousemove', (e) => {
-        if (coords.length === 1) {
-
-        }
-    })
-
 
 	L.imageOverlay('https://image.shutterstock.com/image-photo/little-grey-kitten-walking-yard-260nw-288913778.jpg', bounds).addTo(map)
 
