@@ -117,7 +117,7 @@ const drawLadderLine = (startX, startY, endX, endY, weight) => {
 
 const types = ['normal', 'dashed', 'zigzag', 'arrow', 'ladder']
 
-let lineType = 'normal'
+let lineType = 'arrow'
 document.addEventListener('DOMContentLoaded', () => {
         for (let type of types) {
             console.log(type);
@@ -146,9 +146,9 @@ import * as L from './Leaflet';
         }
         else if (coords.length === 1) {
             if (lineType !== 'dashed')
-             L.polyline([[coords[0].lat, coords[0].lng],[e.latlng.lat,e.latlng.lng]], {color: 'red', lineType: lineType , noClip: true}).addTo(map);
+             L.polyline([[coords[0].lat, coords[0].lng],[e.latlng.lat,e.latlng.lng]], {color: 'black', lineType: lineType , noClip: true}).addTo(map);
             else
-             L.polyline([[coords[0].lat, coords[0].lng],[e.latlng.lat,e.latlng.lng]], {color: 'red', dashArray: [5,5] , noClip: true}).addTo(map);
+             L.polyline([[coords[0].lat, coords[0].lng],[e.latlng.lat,e.latlng.lng]], {color: 'black', dashArray: [5,5] , noClip: true}).addTo(map);
              coords = []
              // coords.push(e.latlng)
             // console.log(coords)
@@ -170,7 +170,7 @@ import * as L from './Leaflet';
     // L.polyline([[100,100],[400,600]], {color: 'red', lineType: 'ladder' , noClip: true}).addTo(map);
 
 
-    L.polyline([[500,500],[588,580]], {color: 'red', lineType: '', weight: 4, dashArray: [5,5]}).addTo(map);
+    L.polyline([[500,500],[588,580]], {color: 'black', lineType: 'arrow', weight: 4}).addTo(map);
 
 
 
