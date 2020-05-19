@@ -117,7 +117,7 @@ const drawLadderLine = (startX, startY, endX, endY, weight) => {
 
 const types = ['normal', 'dashed', 'zigzag', 'arrow', 'ladder']
 
-let lineType = 'arrow'
+let lineType = 'normal'
 document.addEventListener('DOMContentLoaded', () => {
         for (let type of types) {
             console.log(type);
@@ -170,7 +170,7 @@ import * as L from './Leaflet';
     // L.polyline([[100,100],[400,600]], {color: 'red', lineType: 'ladder' , noClip: true}).addTo(map);
 
 
-    L.polyline([[500,500],[588,580]], {color: 'black', lineType: 'arrow', weight: 4}).addTo(map);
+    // L.polyline([[500,500],[588,580]], {color: 'black', lineType: 'normal', weight: 4}).addTo(map);
 
 
 

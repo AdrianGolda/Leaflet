@@ -279,51 +279,45 @@ export var Canvas = Renderer.extend({
 		const cos = Math.cos;
 		const sin = Math.sin;
 		const beta = 30/180*PI-(alfa)
-		// const gamma =  PI - beta
 		const canvasWeight = weight * zoom
 		const x = canvasWeight;
-		// const arrow =  `m ${endX} ${endY} l  ${x} ${2*x} l ${-2*x} ${0*x} z `
      	let arrow =  `m ${endX} ${endY} l  ${-x*cos(beta)} ${x*sin(beta)}  l ${-x*cos(beta-0.5*PI-0.166*PI)} ${x*sin(beta-0.5*PI-0.166*PI)} z`
-		// path += arrow
 		const pathObject = new Path2D(arrow);
 		ctx.fill(pathObject)
 		ctx.stroke(pathObject)
 	},
 
 
-	 _drawLadderLine: function(startX, startY, endX, endY, weight, ctx)  {
-
-
+	 _drawLadderLine: function(startX, startY, endX, endY, weight, ctx) {
 		 const realStart = this._map.layerPointToLatLng([startX, startY])
 		 const realEnd = this._map.layerPointToLatLng([endX, endY]);
+		 const dx = endX - startX;
+		 const dy = endY - startY;
+		 const alfa = Math.atan2(dy, dx)
+		 const PI = Math.PI;
+		 const beta = PI - alfa
+		 const zoom = 2 ** this._map.getZoom();
+		 const canvasWeight = weight * zoom
+		 const x = canvasWeight;
+		 const cos = Math.cos;
+		 const sin = Math.sin;
+		 const oneLadder = ` l ${x * cos(beta-0.5*PI)} ${-x * sin(beta-0.5*PI)}  l ${-x * cos(beta)} ${x * sin(beta)}
+		   l ${-x * cos(beta-0.5*PI)} ${x * sin(beta-0.5*PI)} l ${x * cos(beta)} ${-x * sin(beta)} m ${-x * cos(beta)} ${x * sin(beta)} `
+		 const realLength = Math.sqrt((realEnd.lng - realStart.lng) ** 2 + (realEnd.lat - realStart.lat) ** 2)
+		 const L = realLength * zoom;
+		 const howManyLadders = L / x;
+		 let path = ` m ${startX} ${startY}  `
+		 for (let i = 0; i < howManyLadders; i++) {
+			 path += oneLadder
+		 }
+
+		 const pathObject = new Path2D(path);
+		 ctx.stroke(pathObject)
+
+	 },
 
 
-		 //
-		 // // const realStart = this._map.containerPointToLatLng([startX, startY]);
-		 // // const realEnd = this._map.containerPointToLatLng([endX, endY]);
-		 //
-		 // console.log('real', realStart, realEnd)
-		 // const realLength = Math.sqrt((realEnd.lng-realStart.lng)**2+(realEnd.lat-realStart.lat)**2)
-		 // console.log('real Length', realLength)
-		 const dx = endX - startX
-		 const dy = endY - startY
-		 ctx.moveTo(startX, startY)
-		 ctx.lineTo(endX, endY)
-		 ctx.lineTo(endX-weight, endY-weight)
-		 ctx.lineTo(startX-weight, startY-weight)
-		 ctx.lineTo(startX, startY)
-		 let i = 0
-		 let currentCoords = [startX, startY]
-		 while (currentCoords[0] < endX && currentCoords[1] > endY) {
-		 	let curX = (Math.abs(dx) / weight) * i + startX
-			let curY = (Math.abs(dy) / weight) * -i + startY
-			ctx.moveTo(curX, curY)
-			// ctx.lineTo(startX+i*weight, startY-i*weight);
-			ctx.lineTo(curX-weight, curY-weight);
-			currentCoords = [curX, curY]
-			i++
-			}
-		},
+
 
 
 	_drawZigZagLine: function(startX,startY,endX,endY, weight,ctx) {
@@ -381,9 +375,6 @@ export var Canvas = Renderer.extend({
 						const start = parts[i][j];
 						const end = parts[i][j + 1];
 						this._drawLadderLine(start.x, start.y, end.x, end.y, 5, ctx)
-
-
-						// ctx[j ? 'lineTo' : 'moveTo'](p.x, p.y);
 					}
 
 				}
