@@ -283,11 +283,10 @@ export var Canvas = Renderer.extend({
 		const canvasWeight = weight * zoom
 		const x = canvasWeight;
 		// const arrow =  `m ${endX} ${endY} l  ${x} ${2*x} l ${-2*x} ${0*x} z `
-     	const arrow =  `m ${endX} ${endY} l  ${-x*cos(beta)} ${x*sin(beta)} `
-
+     	let arrow =  `m ${endX} ${endY} l  ${-x*cos(beta)} ${x*sin(beta)}  l ${-x*cos(beta-0.5*PI-0.166*PI)} ${x*sin(beta-0.5*PI-0.166*PI)} z`
 		// path += arrow
 		const pathObject = new Path2D(arrow);
-		// ctx.fill(pathObject)
+		ctx.fill(pathObject)
 		ctx.stroke(pathObject)
 	},
 
@@ -400,7 +399,7 @@ export var Canvas = Renderer.extend({
 						const start = parts[i][j];
 						const end = parts[i][j + 1];
 						// ctx.lineTo(end.x, end.y)
-						this._drawArrowLine(start.x, start.y, end.x, end.y, 5, ctx)
+						this._drawArrowLine(start.x, start.y, end.x, end.y, 10, ctx)
 					}
 				}
 			this._fillStroke(ctx, layer);
