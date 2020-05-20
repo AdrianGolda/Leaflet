@@ -175,8 +175,135 @@ export var SVG = Renderer.extend({
 		}
 	},
 
+	_prepareArrowLine: function(layer, closed, weight)  {
+		const {cos, sin, PI, atan2} = Math;
+		const {x: endX, y: endY} = layer._parts[0].slice(-1)[0];
+		const {x: startX, y: startY} = layer._parts[0].slice(-2)[0];
+		let path = pointsToPath(layer._parts, closed);
+		const canvasWeight = weight// * zoom
+		const x = canvasWeight;
+
+		console.log('endX, endY', endX, endY);
+		const alfa = atan2(endY-startY,endX-startX)
+		const beta = 30/180*PI-(alfa)
+			// path += `M${endX} ${endY}L${endX+30} ${endY+30}`
+			path += `M${endX} ${endY}L${endX+(-x * cos(beta))} ${endY+(x * sin(beta))} 
+			l ${(-x * cos(beta - 0.5 * PI - 0.166 * PI))} ${(x * sin(beta - 0.5 * PI - 0.166 * PI))} z `
+			this._setPath(layer, path)
+		// layer._path.setAttribute('fill', layer.options.fillColor ||layer.options.color )
+		},
+
+
+
+	 _prepareLadderLine: function(startX, startY, endX, endY, weight) {
+		 const realStart = this._map.layerPointToLatLng([startX, startY])
+		 const realEnd = this._map.layerPointToLatLng([endX, endY]);
+
+		 const dx = endX - startX;
+		 const dy = endY - startY;
+		 const alfa = Math.atan2(dy, dx)
+		 const PI = Math.PI;
+		 const beta = PI - alfa
+		 const zoom = 2 ** this._map.getZoom();
+		 const canvasWeight = weight //* zoom
+		 const x = canvasWeight;
+		 const cos = Math.cos;
+		 const sin = Math.sin;
+		 const oneLadder = ` l ${x * cos(beta-0.5*PI)} ${-x * sin(beta-0.5*PI)}  l ${-x * cos(beta)} ${x * sin(beta)}
+		   l ${-x * cos(beta-0.5*PI)} ${x * sin(beta-0.5*PI)} l ${x * cos(beta)} ${-x * sin(beta)} m ${-x * cos(beta)} ${x * sin(beta)} `
+		 const realLength = Math.sqrt((realEnd.lng - realStart.lng) ** 2 + (realEnd.lat - realStart.lat) ** 2)
+		 const L = realLength * zoom;
+		 const howManyLadders = L / x;
+		 let path = ` m ${startX} ${startY}  `
+		 for (let i = 0; i < howManyLadders; i++) {
+			 path += oneLadder
+		 }
+		 return path;
+
+	 },
+
+	_prepareZigZagLine: function(startX,startY,endX,endY, weight) {
+		console.log('lol?')
+		const realStart = this._map.layerPointToLatLng([startX, startY]);
+		const realEnd = this._map.layerPointToLatLng([endX, endY]);
+		 console.log('realStart', realStart)
+		console.log('startX,Y', startX, startY)
+		const zoom = 2**this._map.getZoom();
+		 // startX = zoom * startX;
+		 // startY = zoom * startY;
+		const canvasWeight = weight;
+		const canvasDx = endX-startX;
+		const canvasDy = endY - startY;
+		const canvasLength = Math.sqrt((canvasDx)**2+(canvasDy)**2)
+		const realDx = realEnd.lng-realStart.lng;
+		const realDy = realEnd.lat-realStart.lat;
+		const alpha = Math.atan2(realDy, realDx)
+		const x = canvasWeight;
+		const L = canvasLength;
+		const PI = Math.PI
+		const beta = (alpha - 0.25*PI);
+		const sin = Math.sin;
+		const cos = Math.cos;
+
+	    const howManyZigZags = L/(2*x*Math.sqrt(2))
+		const oneZigZag = `
+		l ${x*cos(beta)} ${-x*sin(beta)} 
+		l ${-2*x*sin(beta)} ${-2*x*cos(beta)} 
+		 l ${x*cos(beta)} ${-x*sin(beta)} 
+		`;
+		let path = `m ${startX} ${startY}`
+		for (let i=0; i < howManyZigZags;i++) {
+			path += oneZigZag
+		}
+		return path
+	},
+
 	_updatePoly: function (layer, closed) {
-		this._setPath(layer, pointsToPath(layer._parts, closed));
+
+		var i, j, len2,
+			parts = layer._parts,
+			len = parts.length
+
+		if (!len) {
+			// When zooming outside of the path the _parts get set to empty array and we have
+			// to update the view by setting the path to M0 0. Setting Path to '' is not possible because of SVG specification
+			console.log('clear')
+			return this._setPath(layer, 'M0 0 ')
+		}
+
+		if (!layer.options.lineType || layer.options.lineType === 'normal') {
+			return this._setPath(layer, pointsToPath(layer._parts, closed));
+		}
+		else if (layer.options.lineType === 'arrow' ) {
+			return this._prepareArrowLine(layer, closed, 10)
+		}
+
+		// console.log(len);
+
+			let path = '';
+			for (i = 0; i < len; i++) {
+				for (j = 0, len2 = parts[i].length; j + 1 < len2; j++) {
+				const start = parts[i][j];
+				const end = parts[i][j + 1];
+
+				switch (layer.options.lineType) {
+					case 'ladder':
+						path += this._prepareLadderLine(start.x, start.y, end.x, end.y, 5);
+						//this._setPath(layer, path)
+						break
+					case 'zigzag':
+						path += this._prepareZigZagLine(start.x, start.y, end.x, end.y, 2);
+						//this._setPath(layer, path)
+						break;
+					default:
+						path += `m ${start.x} ${start.y} l ${end.x} ${end.y} `
+						//this._setPath(layer, path)
+						break;
+				}
+			}
+		}
+			this._setPath(layer, path)
+			console.log(path)
 	},
 
 	_updateCircle: function (layer) {

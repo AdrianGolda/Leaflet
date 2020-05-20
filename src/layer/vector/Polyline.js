@@ -201,13 +201,9 @@ export var Polyline = Path.extend({
 	},
 
 	_project: function () {
-			// console.log(this._latlngs, this._rings);
 		var pxBounds = new Bounds();
 		this._rings = [];
-		console.log('project', this._latlngs)
 		this._projectLatlngs(this._latlngs, this._rings, pxBounds);
-		console.log(this._rings)
-
 		if (this._bounds.isValid() && pxBounds.isValid()) {
 			this._rawPxBounds = pxBounds;
 			this._updateBounds();

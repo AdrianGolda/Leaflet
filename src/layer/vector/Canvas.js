@@ -366,82 +366,32 @@ export var Canvas = Renderer.extend({
 		if (!len) {
 			return;
 		}
-		console.log(layer.options.lineType)
-
-		switch (layer.options.lineType) {
-			case 'ladder': {
-				for (i = 0; i < len; i++) {
-					for (j = 0, len2 = parts[i].length; j + 1 < len2; j++) {
-						const start = parts[i][j];
-						const end = parts[i][j + 1];
-						this._drawLadderLine(start.x, start.y, end.x, end.y, 5, ctx)
-					}
+		for (i = 0; i < len; i++) {
+			for (j = 0, len2 = parts[i].length; j + 1 < len2; j++) {
+				const start = parts[i][j];
+				const end = parts[i][j + 1];
+				switch (layer.options.lineType) {
+					case 'ladder':
+						this._drawLadderLine(start.x, start.y, end.x, end.y, 5, ctx);
+						break
+					case 'arrow':
+						this._drawArrowLine(start.x, start.y, end.x, end.y, 10, ctx);
+						break;
+					case 'zigzag':
+						this._drawZigZagLine(start.x, start.y, end.x, end.y, 2, ctx);
+						break;
+					default:
+						ctx.beginPath();
+						ctx.moveTo(start.x, start.y);
+						ctx.lineTo(end.x, end.y);
 
 				}
-			this._fillStroke(ctx, layer);
-				break;
-			}
-			case 'arrow' : {
-				console.log('arrow')
-				ctx.beginPath();
-				ctx.moveTo(parts[0][0].x, parts[0][0].y)
-				for (i = 0; i < len; i++) {
-					for (j = 0, len2 = parts[i].length; j + 1 < len2; j++) {
-						const start = parts[i][j];
-						const end = parts[i][j + 1];
-						// ctx.lineTo(end.x, end.y)
-						this._drawArrowLine(start.x, start.y, end.x, end.y, 10, ctx)
-					}
-				}
-			this._fillStroke(ctx, layer);
-				break;
-			}
-				case 'zigzag' : {
-				ctx.beginPath();
-				for (i = 0; i < len; i++) {
-					for (j = 0, len2 = parts[i].length; j + 1 < len2; j++) {
-						const start = parts[i][j];
-						const end = parts[i][j + 1];
-						this._drawZigZagLine(start.x, start.y, end.x, end.y, 4, ctx)
-					}
-				}
-			this._fillStroke(ctx, layer);
-
-			}
-			break;
-			default: {
-
-
-				ctx.beginPath();
-
-				// let path= ` moveTo ${parts[0][0].x} ${parts[0][0].y} `
-				ctx.moveTo(parts[0][0].x, parts[0][0].y)
-				for (i = 0; i < len; i++) {
-					for (j = 1, len2 = parts[i].length; j < len2; j++) {
-						p = parts[i][j];
-						// path+=` lineto ${p.x} ${p.y} `
-						ctx.lineTo(p.x, p.y)
-						// ctx[j ? 'lineTo' : 'moveTo'](p.x, p.y);
-
-					}
-
-					if (closed) {
-						ctx.closePath();
-					}
-				}
-				// console.log(path)
-				// const pathObj = new Path2D(path)
-				// ctx.stroke(pathObj)
-
 				this._fillStroke(ctx, layer);
 			}
-
-
-			// TODO optimization: 1 fill/stroke for all features with equal style instead of 1 for each feature
 		}
 		if (closed) {
-						ctx.closePath();
-					}
+			ctx.closePath()
+		}
 	},
 
 	_updateCircle: function (layer) {

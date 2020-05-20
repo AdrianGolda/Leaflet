@@ -125,11 +125,12 @@ import * as L from './Leaflet';
 	var renderer = new L.Canvas;
 	var map = L.map('map', {
 		crs: L.CRS.Simple,
-        preferCanvas: true,
+        preferCanvas: false,
         tap: false,
         dragging: true,
         center: [500,500],
-        zoom: 1
+        zoom: 1,
+        renderer: renderer
     });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -163,9 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let icon of icons) {
 
             document.getElementById(icon).addEventListener('click', (e) => {
-                   var iconUrl = `../${icon}.svg`
-                // iconType = icon;
-                // console.log('icon' ,icon)
+                var iconUrl = `../${icon}.svg`;
                 map.off('click')
                 map.on('click', (e) => {
                     const iconL = L.Icon.extend({options: {iconUrl: iconUrl, iconRetinaUrl: iconUrl, iconSize: [30,30]}});
@@ -184,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // L.polyline([[100,100],[400,600]], {color: 'red', lineType: 'ladder' , noClip: true}).addTo(map);
 
 
-    // L.polyline([[500,500],[588,580]], {color: 'black', lineType: 'normal', weight: 4}).addTo(map);
+    L.polyline([[500,500],[588,580],[400,900], [300,300]], {color: 'black', lineType: 'ladder', weight: 4}).addTo(map);
 
 
 
